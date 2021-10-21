@@ -15,4 +15,9 @@ export class SidebarComponent {
 
   }
 
+  searchClick(term: string) {
+    console.log(term);
+    this.gifsService.gifsSearch(term);
+  }
+
 }

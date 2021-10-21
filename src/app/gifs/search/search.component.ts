@@ -25,7 +25,7 @@ export class SearchComponent {
     }
 
 
-    this.gifsService.gifsSearch(search);  // inserta valores al array
+    this.gifsService.gifsSearch(search);  // va la funcion para enviar la peticion
     this.txtSearch.nativeElement.value = '';  // inicializa el inputBox
   }
 

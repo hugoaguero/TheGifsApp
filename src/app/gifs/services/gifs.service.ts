@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { SearchGifsResponse, Gif } from '../interface/gifs.interface';
 
@@ -7,7 +7,8 @@ import { SearchGifsResponse, Gif } from '../interface/gifs.interface';
 })
 export class GifsService {
 
-  private apiKey = 'M1Fvl79LluRZKy1F1goorJyeAsH65DPz';
+  private apiKey: string = 'M1Fvl79LluRZKy1F1goorJyeAsH65DPz';
+  private urlService: string = 'https://api.giphy.com/v1/gifs';
   private _history: string[] = [];
 
   public queryResult: Gif[] = []; // Gif es la interface para la propiedad
@@ -17,7 +18,13 @@ export class GifsService {
   }
 
   constructor(private http: HttpClient) {  // inyectar el servicio de HttpClient
+    this._history = JSON.parse(localStorage.getItem('history')!) || []; // almacena en la variable lo que quedo guardado en el local storage
+    this.queryResult = JSON.parse(localStorage.getItem('queryResult')!) || []; // almacena las imagenes de la ultima busqueda
 
+
+    // if(localStorage.getItem('history')) {
+    //   this._history = JSON.parse(localStorage.getItem('history')!);
+    // }
   }
 
   gifsSearch(query: string) {
@@ -25,11 +32,19 @@ export class GifsService {
     if (!this._history.includes(query)) {  // valida si se repite el valor
       this._history.unshift(query); // insertar el nuevo elemento al comienzo del array
       this._history = this._history.splice(0, 10);  // corta el array con splice(x a y)
+
+      localStorage.setItem('history', JSON.stringify(this._history)); // esto guarda las busquedas almacenadas apesar de refrescar página
     }
-    this.http.get<SearchGifsResponse>(`https://api.giphy.com/v1/gifs/search?api_key=M1Fvl79LluRZKy1F1goorJyeAsH65DPz&q=${query}&limit=10`)
+
+    const params = new HttpParams() // permite construir los parametros para el get
+      .set('api_key', this.apiKey)
+      .set('limit', '10')
+      .set('query', 'query');
+
+    this.http.get<SearchGifsResponse>(`${this.urlService}/search`,{params}) // forma simple de controlar los parametros para la consulta
       .subscribe((resp) => {
-        console.log(resp.data);
         this.queryResult = resp.data;
+        localStorage.setItem('queryResult', JSON.stringify(this.queryResult));
       });
   }
 
